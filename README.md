@@ -19,15 +19,17 @@ When is solution NOT 1999
     DummyService
     Moq as framework for unit tests
 
-Design overview:
+# Design overview:
 
 Domain project:
+
     1. Defines contracts
     2. Defines model
     3. Define interfaces
 
 Configuration project:
     Implements simple configuration allowing to start and use load balancer for:
+    
     1. Different set of nodes
     2. Differnt Load balancing strategy
     3. Port on which LB is running
@@ -35,12 +37,15 @@ Configuration project:
 
 Core project:
     Implementation of:
+    
     1. Health check monitor dynamically maintaining list of healthy nodes
     2. Strategies for load balancer
     3. Event-based asynchronous pattern version of load balancer (async/await is forbidden due to 1999 requirement)
 
 DummyService:
+
 Simple implementation of Tcp listener to demonstrate and test load balancer
 
 Demo project:
+
 Simple demo, starts 3 dummy services, calls LB 10 times.
