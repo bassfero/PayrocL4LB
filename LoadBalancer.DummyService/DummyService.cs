@@ -103,16 +103,47 @@ public class DummyService
             using (client)
             using (var stream = client.GetStream())
             {
-                string welcomeMessage = $"{_logMessage}. You are connection #{currentCount}.\r\n";
-                byte[] buffer = Encoding.ASCII.GetBytes(welcomeMessage);
-                await stream.WriteAsync(buffer.AsMemory(), token);
-                Console.WriteLine($"{_logMessage} Request received from {clientEndpoint}.");
-                Task.Delay(_random.Next(1000, 5000), token).Wait();
+                // 1. Read request data from LB
+                byte[] readBuffer = new byte[1024];
+                int bytesRead = await stream.ReadAsync(readBuffer.AsMemory(), token);
+
+                string requestData = bytesRead > 0
+                    ? Encoding.ASCII.GetString(readBuffer, 0, bytesRead)
+                    : "";
+                if (!string.IsNullOrEmpty(requestData))
+                {
+                    Console.WriteLine($"[DummyService {_port}] Received: {requestData.Trim().Split('\r')[0]}...");
+                }
+
+                // 2. Simulate some processing
+                await Task.Delay(new Random().Next(50, 150), token);
+
+                // 3. Build HTTP response
+                string body = $"<h1>Response from {_port}</h1>" +
+                              $"<p>Connection Index: {currentCount}</p>" +
+                              $"<p>Time: {DateTime.Now:HH:mm:ss.fff}</p>";
+
+                byte[] bodyBytes = Encoding.UTF8.GetBytes(body);
+
+                string headers = $"HTTP/1.1 200 OK\r\n" +
+                                 $"Content-Type: text/html; charset=utf-8\r\n" +
+                                 $"Content-Length: {bodyBytes.Length}\r\n" +
+                                 $"Connection: close\r\n\r\n";
+
+                byte[] headerBytes = Encoding.ASCII.GetBytes(headers);
+
+                // 4. Send complete response
+                await stream.WriteAsync(headerBytes.AsMemory(), token);
+                await stream.WriteAsync(bodyBytes.AsMemory(), token);
+                await stream.FlushAsync(token); // ensure LB sees EOF
+
+                // 5. Explicitly close the connection
+                client.Close();
             }
         }
         catch (OperationCanceledException)
         {
-            // Task canceled, do nothing
+            // expected if cancellation token triggered
         }
         catch (Exception ex)
         {
@@ -122,7 +153,6 @@ public class DummyService
         {
             Interlocked.Decrement(ref _connectionCount);
             Console.WriteLine($"{_logMessage} Connection closed. Active: {_connectionCount}");
-            
         }
     }
 }
