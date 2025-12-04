@@ -1,0 +1,46 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "Tests\Tests.csproj", "{FD18553C-8132-4BF1-84D5-AA6DFAA95F03}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LoadBalancer.Configuration", "LoadBalancer.Configuration\LoadBalancer.Configuration.csproj", "{D384EF99-BB72-43A8-BC3B-AA9FA0EF0D8D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LoadBalancer.Domain", "LoadBalancer.Domain\LoadBalancer.Domain.csproj", "{B04AA4F0-7EC5-4D25-906F-DDDF58B4AB8F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LoadBalancer.DummyService", "LoadBalancer.DummyService\LoadBalancer.DummyService.csproj", "{344D8F15-37B4-4439-B87D-8046751D3E9A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LoadBalancer.Demo", "LoadBalancer.Demo\LoadBalancer.Demo.csproj", "{F7E8CA12-8BD5-424C-A0BC-AE2A097D3043}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LoadBalancer.Core", "LoadBalancer.Core\LoadBalancer.Core.csproj", "{3F53B849-1196-4BFE-8305-6C2BF53DE240}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{FD18553C-8132-4BF1-84D5-AA6DFAA95F03}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FD18553C-8132-4BF1-84D5-AA6DFAA95F03}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FD18553C-8132-4BF1-84D5-AA6DFAA95F03}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FD18553C-8132-4BF1-84D5-AA6DFAA95F03}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D384EF99-BB72-43A8-BC3B-AA9FA0EF0D8D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D384EF99-BB72-43A8-BC3B-AA9FA0EF0D8D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D384EF99-BB72-43A8-BC3B-AA9FA0EF0D8D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D384EF99-BB72-43A8-BC3B-AA9FA0EF0D8D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B04AA4F0-7EC5-4D25-906F-DDDF58B4AB8F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B04AA4F0-7EC5-4D25-906F-DDDF58B4AB8F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B04AA4F0-7EC5-4D25-906F-DDDF58B4AB8F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B04AA4F0-7EC5-4D25-906F-DDDF58B4AB8F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{344D8F15-37B4-4439-B87D-8046751D3E9A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{344D8F15-37B4-4439-B87D-8046751D3E9A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{344D8F15-37B4-4439-B87D-8046751D3E9A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{344D8F15-37B4-4439-B87D-8046751D3E9A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F7E8CA12-8BD5-424C-A0BC-AE2A097D3043}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F7E8CA12-8BD5-424C-A0BC-AE2A097D3043}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F7E8CA12-8BD5-424C-A0BC-AE2A097D3043}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F7E8CA12-8BD5-424C-A0BC-AE2A097D3043}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3F53B849-1196-4BFE-8305-6C2BF53DE240}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3F53B849-1196-4BFE-8305-6C2BF53DE240}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3F53B849-1196-4BFE-8305-6C2BF53DE240}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3F53B849-1196-4BFE-8305-6C2BF53DE240}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
