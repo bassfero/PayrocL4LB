@@ -78,12 +78,13 @@ public class TcpRequestForwarder : IRequestForwarder
 
     private void Send(Socket client, RequestState state)
     {
-        // 1. Construct the minimal HTTP GET request
-        string httpRequest = $"GET / HTTP/1.1\r\nHost: {state.TargetNode.Host}:{state.TargetNode.Port}\r\nConnection: close\r\n\r\n";
-        byte[] byteData = Encoding.ASCII.GetBytes(httpRequest);
-
-        // 2. Begin sending the data (non-blocking)
+        string simplePayload = $"PING from LB Request ID: {state.RequestId}\r\n";
+        
+        byte[] byteData = Encoding.ASCII.GetBytes(simplePayload);
+        
         client.BeginSend(byteData, 0, byteData.Length, SocketFlags.None, new AsyncCallback(SendCallback), state);
+        
+        // NOTE: state.ResponseBuffer (containing the original HTTP request) is ignored in this temporary mode.
     }
 
     private void SendCallback(IAsyncResult ar)
@@ -93,15 +94,15 @@ public class TcpRequestForwarder : IRequestForwarder
 
         try
         {
-            // Finish the sending operation and get the number of bytes sent
-            int bytesSent = client.EndSend(ar);
+            client.EndSend(ar);
+            
 
-            // 3. Begin receiving the response (non-blocking)
+            client.Shutdown(SocketShutdown.Send); 
+            
             client.BeginReceive(state.Buffer, 0, RequestState.BufferSize, SocketFlags.None, new AsyncCallback(ReceiveCallback), state);
         }
         catch (Exception ex)
         {
-            // Send failed
             client.Close();
             OnForwardRequestCompleted(new RequestForwardCompletedEventArgs(
                 null, 
