@@ -29,8 +29,6 @@ public class Program
         {
             await SimulateClientConnection(helper.Config.LBListeningPort(), "Data");
         }
-
-        Console.ReadLine();
         
         loadBallancer.Stop();
         
