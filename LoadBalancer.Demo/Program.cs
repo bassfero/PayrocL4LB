@@ -1,4 +1,4 @@
-﻿using System.Net;
+using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using LoadBalancer.Configuration.Services;
@@ -25,70 +25,91 @@ public class Program
         
         loadBallancer.Start();
 
+        await SimulateClientConnection(9502, "Data");
         for (int i = 0; i < 10; i++)
         {
             await SimulateClientConnection(helper.Config.LBListeningPort(), "Data");
         }
-        
+
         loadBallancer.Stop();
         
         // Cleanup
         await StopDummyServices();
     }
 
-    /// <summary>
-    /// Simulates a simple TCP client connecting to a backend node, sending data, and receiving a response.
-    /// </summary>
-    private static async Task 
-        SimulateClientConnection(int port, string probeData)
+    public static async Task<string> SimulateClientConnection(int port, string dataProbe)
     {
-        Console.ForegroundColor = ConsoleColor.Cyan;
-        Console.WriteLine($"\n[Client] Attempting connection to {port}...");
-        Console.ResetColor();
+        var host = "127.0.0.1";
+        Console.WriteLine($"\n--- Simulating Client Connection to {host}:{port} ---");
 
         try
         {
             using (var client = new TcpClient())
             {
-                // Set a timeout for the connection attempt
-                var connectTask = client.ConnectAsync(IPAddress.Loopback, port);
-                if (await Task.WhenAny(connectTask, Task.Delay(2000)) != connectTask)
-                {
-                    throw new TimeoutException($"Connection attempt to {port} timed out.");
-                }
-                
-                using (var stream = client.GetStream())
-                {
-                    // 1. Send test data
-                    byte[] sendBuffer = Encoding.ASCII.GetBytes(probeData + "\r\n");
-                    await stream.WriteAsync(sendBuffer.AsMemory());
-                    
-                    // 2. Read the response/greeting
-                    byte[] readBuffer = new byte[1024];
-                    int bytesRead = await stream.ReadAsync(readBuffer.AsMemory());
+                // Set reasonable timeouts for synchronous operations
+                client.SendTimeout = 3000;
+                client.ReceiveTimeout = 3000;
 
-                    if (bytesRead > 0)
-                    {
-                        string response = Encoding.ASCII.GetString(readBuffer, 0, bytesRead);
-                        Console.ForegroundColor = ConsoleColor.Cyan;
-                        Console.WriteLine($"[Client] SUCCESS: Received response from {port}:\n{response.Trim()}");
-                        Console.ResetColor();
-                    }
-                    else
-                    {
-                        Console.ForegroundColor = ConsoleColor.Yellow;
-                        Console.WriteLine($"[Client] WARNING: Connection to {port} closed without a response.");
-                        Console.ResetColor();
-                    }
+                // 1. Connect
+                client.Connect(host, port);
+                
+                Console.WriteLine($"Connection successful to {host}:{port}.");
+
+                using (NetworkStream stream = client.GetStream())
+                {
+                    // 2. Send Payload (A simple PING)
+                    string payload = "GET / HTTP/1.1\r\nHost: test\r\nConnection: close\r\n\r\nPING";
+                    byte[] data = Encoding.ASCII.GetBytes(payload);
+                    stream.Write(data, 0, data.Length);
+                    
+                    Console.WriteLine($"Sent {data.Length} bytes.");
+
+                    // 3. Perform Half-Close (Crucial step that mimics the Load Balancer)
+                    // This signals the server that the client is done sending data, 
+                    // but is still ready to receive.
+                    client.Client.Shutdown(SocketShutdown.Send);
+                    Console.WriteLine("Performed SocketShutdown.Send (Half-Close).");
+                    
+                    // 4. Read Response until the server closes the connection
+                    var allStreamData = ReadAllStreamData(stream);
+                    Console.WriteLine($"Received {allStreamData.Length} bytes, data: {allStreamData}");
+                    return allStreamData;
                 }
             }
         }
+        catch (SocketException ex)
+        {
+            return $"Error connecting to or communicating with backend: {ex.Message}";
+        }
+        catch (IOException ex)
+        {
+            return $"IO Error during communication: {ex.Message}";
+        }
         catch (Exception ex)
         {
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine($"[Client] FAILURE: Could not connect to {port}. Error: {ex.Message}");
-            Console.ResetColor();
+            return $"An unexpected error occurred: {ex.Message}";
         }
+    }
+
+    /// <summary>
+    /// Reads all data from the stream until the server closes the connection (bytesRead == 0).
+    /// </summary>
+    private static string ReadAllStreamData(NetworkStream stream)
+    {
+        byte[] buffer = new byte[1024];
+        int bytesRead;
+        var responseBuilder = new StringBuilder();
+        int totalBytes = 0;
+
+        // Loop until Read returns 0 (server closed the connection) or timeout occurs
+        while ((bytesRead = stream.Read(buffer, 0, buffer.Length)) > 0)
+        {
+            responseBuilder.Append(Encoding.ASCII.GetString(buffer, 0, bytesRead));
+            totalBytes += bytesRead;
+        }
+
+        Console.WriteLine($"Finished reading response. Total bytes received: {totalBytes}");
+        return responseBuilder.ToString();
     }
 
     private static async Task StartDummyServices(IConfiguration configuration)
